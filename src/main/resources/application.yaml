@@ -1,3 +1,28 @@
 spring:
   application:
-    name: ledgerpay
+    name: LedgerPay
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ledgerpay
+    username: noctivagous
+    password: noctivagous
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 30000
+      connection-timeout: 20000
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+server:
+  port: 8080
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics

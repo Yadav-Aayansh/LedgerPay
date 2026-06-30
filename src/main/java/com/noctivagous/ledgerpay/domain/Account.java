@@ -8,7 +8,7 @@ import java.time.Instant;
 import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
-@Table(name = "account")
+@Table(name = "account", indexes = @Index(name = "idx_account_owner", columnList = "owner_id"))
 public class Account {
     
     @Id

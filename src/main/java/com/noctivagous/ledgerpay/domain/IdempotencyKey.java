@@ -35,8 +35,8 @@ public class IdempotencyKey {
     }
 
     public String getKey() { return key; }
-    public UUID getTransferID() { return transferId; }
-    public Status geStatus() { return status; }
+    public UUID getTransferId() { return transferId; }
+    public Status getStatus() { return status; }
     public Instant getCreatedAt() { return createdAt; }
 
     public void setStatus(Status status) { this.status = status; }

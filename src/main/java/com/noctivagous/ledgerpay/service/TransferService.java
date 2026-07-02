@@ -51,7 +51,7 @@ public class TransferService {
         }
 
         IdempotencyKey key = new IdempotencyKey(idempotencyKey);
-        idempotencyKeyRepository.saveAndFlush(key);
+        key = idempotencyKeyRepository.saveAndFlush(key);
 
         // 3. Deadlock prevention (lowest first)
         Long firstId = Math.min(fromAccountId, toAccountId);

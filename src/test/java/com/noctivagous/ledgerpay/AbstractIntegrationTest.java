@@ -2,15 +2,16 @@ package com.noctivagous.ledgerpay;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 @SpringBootTest
-@Testcontainers
 public abstract class AbstractIntegrationTest {
 
-    @Container
+    // Started once and shared by every test class, so cached Spring contexts never point at a stopped container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16");
+    static final PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:16");
+
+    static {
+        postgres.start();
+    }
 }

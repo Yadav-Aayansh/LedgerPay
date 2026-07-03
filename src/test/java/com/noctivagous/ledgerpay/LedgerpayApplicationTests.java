@@ -1,10 +1,8 @@
 package com.noctivagous.ledgerpay;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class LedgerpayApplicationTests {
+class LedgerpayApplicationTests extends AbstractIntegrationTest {
 
 	@Test
 	void contextLoads() {

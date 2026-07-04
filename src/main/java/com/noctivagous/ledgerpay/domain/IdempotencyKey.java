@@ -6,10 +6,11 @@ import java.util.UUID;
 import java.time.Instant;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.domain.Persistable;
 
 @Entity
 @Table(name = "idempotency_key")
-public class IdempotencyKey {
+public class IdempotencyKey implements Persistable<String> {
     public enum Status { PENDING, SUCCEEDED, FAILED }
 
     @Id
@@ -27,6 +28,11 @@ public class IdempotencyKey {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    // The id is assigned, so without this save() would merge() and could overwrite a key
+    // that a concurrent request just committed. persist() makes the primary key reject it.
+    @Transient
+    private boolean isNew = true;
+
     protected IdempotencyKey() {}
 
     public IdempotencyKey(String key) {
@@ -41,6 +47,16 @@ public class IdempotencyKey {
 
     public void setStatus(Status status) { this.status = status; }
     public void setTransferId(UUID transferId) { this.transferId = transferId; }
+
+    @Override
+    public String getId() { return key; }
+
+    @Override
+    public boolean isNew() { return isNew; }
+
+    @PostLoad
+    @PostPersist
+    void markNotNew() { this.isNew = false; }
 
     @Override
     public boolean equals(Object o) {

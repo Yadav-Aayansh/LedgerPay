@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,7 +55,12 @@ public class TransferService {
         }
 
         IdempotencyKey key = new IdempotencyKey(idempotencyKey);
-        key = idempotencyKeyRepository.saveAndFlush(key);
+        try {
+            key = idempotencyKeyRepository.saveAndFlush(key);
+        } catch (DataIntegrityViolationException e) {
+            // A concurrent request inserted the same key first. A retry returns its result.
+            throw new TransferInProgressException(idempotencyKey);
+        }
 
         // 3. Deadlock prevention (lowest first)
         Long firstId = Math.min(fromAccountId, toAccountId);

@@ -10,6 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.noctivagous.ledgerpay.domain.Account;
 import com.noctivagous.ledgerpay.domain.IdempotencyKey;
 import com.noctivagous.ledgerpay.domain.LedgerEntry;
+import com.noctivagous.ledgerpay.exception.AccountNotFoundException;
+import com.noctivagous.ledgerpay.exception.InsufficientFundsException;
+import com.noctivagous.ledgerpay.exception.TransferInProgressException;
 import com.noctivagous.ledgerpay.repository.AccountRepository;
 import com.noctivagous.ledgerpay.repository.IdempotencyKeyRepository;
 import com.noctivagous.ledgerpay.repository.LedgerEntryRepository;
@@ -47,7 +50,7 @@ public class TransferService {
                 return existingkey.getTransferId();
             }
 
-            throw new IllegalStateException("Transaction is already being processed");
+            throw new TransferInProgressException(idempotencyKey);
         }
 
         IdempotencyKey key = new IdempotencyKey(idempotencyKey);
@@ -59,10 +62,10 @@ public class TransferService {
 
         // 4. Acquire Pessimistic Locks in Sorted Order
         Account first = accountRepository.findByIdForUpdate(firstId)
-        .orElseThrow(() -> new IllegalArgumentException("Account not found: " + firstId));
-        
+        .orElseThrow(() -> new AccountNotFoundException(firstId));
+
         Account second = accountRepository.findByIdForUpdate(secondId)
-        .orElseThrow(() -> new IllegalArgumentException("Account not found: " + secondId));
+        .orElseThrow(() -> new AccountNotFoundException(secondId));
 
 
         // 5. Re-assign references after locking
@@ -71,7 +74,7 @@ public class TransferService {
 
         // 6. Balance Check
         if (sender.getBalance().compareTo(amount) < 0) {
-            throw new IllegalStateException("Insufficient balance in account " + sender.getId());
+            throw new InsufficientFundsException(sender.getId());
         }
 
         // 7. Move Money in Memory

@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LedgerEntryRepository extends JpaRepository<LedgerEntry, Long> {
     
-    List<LedgerEntry> findByAccountId(Long accountId);
+    List<LedgerEntry> findByAccountIdOrderByIdAsc(Long accountId);
 
     List<LedgerEntry> findByTransferId(UUID transferId);
 }

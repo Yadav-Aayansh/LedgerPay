@@ -34,6 +34,19 @@ public class TransferService {
 
     @Transactional
     public UUID transfer(Long fromAccountId, Long toAccountId, BigDecimal amount, String idempotencyKey) {
+        if (Account.CLEARING_ACCOUNT_ID.equals(fromAccountId) || Account.CLEARING_ACCOUNT_ID.equals(toAccountId)) {
+            throw new IllegalArgumentException("The clearing account cannot be used in transfers");
+        }
+        return move(fromAccountId, toAccountId, amount, idempotencyKey);
+    }
+
+    // Deposits are debited from the clearing account, so they are balanced transfers too
+    @Transactional
+    public UUID deposit(Long accountId, BigDecimal amount, String idempotencyKey) {
+        return move(Account.CLEARING_ACCOUNT_ID, accountId, amount, idempotencyKey);
+    }
+
+    private UUID move(Long fromAccountId, Long toAccountId, BigDecimal amount, String idempotencyKey) {
         // 1. Validation error
         if (fromAccountId.equals(toAccountId)) {
             throw new IllegalArgumentException("Cannot transfer money to the same account");
@@ -78,8 +91,8 @@ public class TransferService {
         Account sender = fromAccountId.equals(firstId) ? first : second;
         Account receiver = fromAccountId.equals(firstId) ? second : first;
 
-        // 6. Balance Check
-        if (sender.getBalance().compareTo(amount) < 0) {
+        // 6. Balance Check (only the clearing account may go negative)
+        if (!Account.CLEARING_ACCOUNT_ID.equals(sender.getId()) && sender.getBalance().compareTo(amount) < 0) {
             throw new InsufficientFundsException(sender.getId());
         }
 

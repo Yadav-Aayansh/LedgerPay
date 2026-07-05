@@ -10,7 +10,10 @@ import org.hibernate.annotations.CreationTimestamp;
 @Entity
 @Table(name = "account", indexes = @Index(name = "idx_account_owner", columnList = "owner_id"))
 public class Account {
-    
+
+    // Seeded by V2__add_clearing_account.sql. It funds deposits, so its balance goes negative.
+    public static final Long CLEARING_ACCOUNT_ID = 0L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

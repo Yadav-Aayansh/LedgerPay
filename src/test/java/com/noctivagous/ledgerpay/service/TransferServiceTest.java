@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,7 +40,7 @@ class TransferServiceTest extends AbstractIntegrationTest {
     void cleanup() {
         ledgerEntryRepository.deleteAll();
         idempotencyKeyRepository.deleteAll();
-        accountRepository.deleteAll();
+        accountRepository.deleteAllById(List.of(accountAId, accountBId)); // keep the clearing account
     }
 
     @Test
